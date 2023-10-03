@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from selfc.models import Usuarios,Admins,Activity,Tests
+from selfc.models import Usuarios,Admins,Activity,Tests, School
 
 class UsuariosSerializers(serializers.ModelSerializer):
     class Meta:
@@ -19,4 +19,9 @@ class ActivitySerializers(serializers.ModelSerializer):
 class TestSerializers(serializers.ModelSerializer):
     class Meta:
         model=Tests
+        fields = '__all__'
+
+class SchoolSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=School
         fields = '__all__'

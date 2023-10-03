@@ -2,6 +2,9 @@ from django.db import models
 
 # Create your models here.
 
+class School(models.Model):
+    name = models.CharField(max_length=100)
+
 class Usuarios(models.Model):
     email = models.EmailField(max_length=500,primary_key=True)
     password = models.CharField(max_length=50)
@@ -11,7 +14,7 @@ class Usuarios(models.Model):
     age = models.IntegerField()
     country = models.CharField(max_length=50)
     discipline = models.CharField(max_length=50)
-    school = models.CharField(max_length=50)
+    school = models.ForeignKey(School, on_delete=models.CASCADE)
 
 class Activity(models.Model):
     name = models.CharField(max_length=100)

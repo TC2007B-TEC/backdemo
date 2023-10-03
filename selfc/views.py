@@ -2,14 +2,16 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-from selfc.models import Usuarios,Admins,Activity,Tests
-from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers
-from rest_framework.views import APIView # import the APIView class
-from rest_framework.response import Response # import the Response class
-from rest_framework import status # import the status module
-from rest_framework.permissions import AllowAny # import the AllowAny permission class
-from rest_framework_simplejwt.tokens import RefreshToken # import the RefreshToken class
+from selfc.models import Usuarios,Admins,Activity,Tests,School
+from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers
+from rest_framework.views import APIView 
+from rest_framework.response import Response 
+from rest_framework import status 
+from rest_framework.permissions import AllowAny 
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 # Create your views here.
 
 @csrf_exempt
@@ -23,23 +25,23 @@ def usuariosApi(request, id=0):
         usuarios_ser=UsuariosSerializers(data=usuariosdata)
         if usuarios_ser.is_valid():
             usuarios_ser.save()
-            return JsonResponse("Usuario anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) # add the status code
-        return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) # add the status code
+            return JsonResponse("Usuario anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) 
+        return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='PUT':
         usuariodata =JSONParser().parse(request)
         usuario = Usuarios.objects.get(usuarioemail=usuariodata['email'])
         usuarios_ser=UsuariosSerializers(usuario,data=usuariodata)
         if usuarios_ser.is_valid():
             usuarios_ser.save()
-            return JsonResponse("Usuario actualizado exitosamente", safe=False, status=status.HTTP_200_OK) # add the status code
-        return JsonResponse("No se actualizo", safe=False, status=status.HTTP_400_BAD_REQUEST) # add the status code
+            return JsonResponse("Usuario actualizado exitosamente", safe=False, status=status.HTTP_200_OK) 
+        return JsonResponse("No se actualizo", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='DELETE':
         usuario=Usuarios.objects.get(email=id)
         usuario.delete()
-        return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) # add the status code
+        return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
     
-@csrf_exempt
-def adminsApi(request, id=0):
+@ensure_csrf_cookie
+def adminsApi(request):
     if request.method=='GET':
         admins = Admins.objects.all()
         admins_ser = AdminsSerializers(admins,many=True)
@@ -49,20 +51,20 @@ def adminsApi(request, id=0):
         admins_ser=AdminsSerializers(data=adminsdata)
         if admins_ser.is_valid():
             admins_ser.save()
-            return JsonResponse("admin anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) # add the status code
-        return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) # add the status code
+            return JsonResponse("admin anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) 
+        return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='PUT':
         admindata =JSONParser().parse(request)
         admin = Admins.objects.get(adminemail=admindata['email'])
         admins_ser=AdminsSerializers(admin,data=admindata)
         if admins_ser.is_valid():
             admins_ser.save()
-            return JsonResponse("admin actualizado exitosamente", safe=False, status=status.HTTP_200_OK) # add the status code
-        return JsonResponse("No se actualizo", safe=False, status=status.HTTP_400_BAD_REQUEST) # add the status code
+            return JsonResponse("admin actualizado exitosamente", safe=False, status=status.HTTP_200_OK) 
+        return JsonResponse("No se actualizo", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='DELETE':
         admin=Admins.objects.get(email=id)
         admin.delete()
-        return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) # add the status code
+        return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
 
 # Create a login view that uses the APIView and the JWT tokens
 
@@ -138,3 +140,30 @@ def testsApi(request, id=0):
         test=test.objects.get(email=id)
         test.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False)
+
+@ensure_csrf_cookie
+def schoolApi(request):
+    if request.method=='GET':
+        schools = School.objects.all()
+        schools_ser = SchoolSerializers(schools,many=True)
+        return JsonResponse(schools_ser.data,safe=False)
+    elif request.method=='POST':
+        schoolsdata =JSONParser().parse(request)
+        schools_ser=SchoolSerializers(data=schoolsdata)
+        if schools_ser.is_valid():
+            schools_ser.save()
+            return JsonResponse("school anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) 
+        return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
+    elif request.method=='PUT':
+        schooldata =JSONParser().parse(request)
+        school = School.objects.get(schoolemail=schooldata['email'])
+        schools_ser=SchoolSerializers(school,data=schooldata)
+        if schools_ser.is_valid():
+            schools_ser.save()
+            return JsonResponse("school actualizado exitosamente", safe=False, status=status.HTTP_200_OK) 
+        return JsonResponse("No se actualizo", safe=False, status=status.HTTP_400_BAD_REQUEST) 
+    elif request.method=='DELETE':
+        school=School.objects.get(email=id)
+        school.delete()
+        return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
+
