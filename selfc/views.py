@@ -6,7 +6,7 @@ from selfc.models import Usuarios,Admins,Activity,Tests,School
 from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers
 from rest_framework.views import APIView 
 from rest_framework.response import Response
-from rest_framework import status 
+from rest_framework import status,generics
 from rest_framework.permissions import AllowAny 
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
@@ -18,8 +18,11 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 @csrf_exempt
 def usuariosApi(request, email=None):
     if request.method=='GET':
-        usuarios = Usuarios.objects.all()
-        usuarios_ser = UsuariosSerializers(usuarios,many=True)
+        queryset = Usuarios.objects.all()
+        email = request.GET.get('email')
+        if email is not None:
+            queryset = queryset.filter(email=email)
+        usuarios_ser = UsuariosSerializers(queryset,many=True)
         return JsonResponse(usuarios_ser.data,safe=False)
     elif request.method=='POST':
         usuariodata =JSONParser().parse(request)
@@ -167,3 +170,15 @@ def schoolApi(request):
         school=School.objects.get(email=id)
         school.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
+
+@csrf_exempt
+def loginusu(request):
+    # Get the query params from the request
+    email = request.query_params.get('email')
+    password = request.query_params.get('password')
+
+    # Filter the Usuarios by email and password
+    queryset = Usuarios.objects.filter(email=email, password=password)
+
+    # Return the filtered queryset
+    return queryset

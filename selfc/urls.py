@@ -10,5 +10,6 @@ urlpatterns=[
     path("school/",views.schoolApi),
     path("usuario/<slug:email>/",views.usuariosApi),
     path("login/",views.login),
+    path("usuarios/?",views.loginusu)
 
 ]
