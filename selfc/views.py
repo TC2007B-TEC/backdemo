@@ -5,42 +5,43 @@ from django.http.response import JsonResponse
 from selfc.models import Usuarios,Admins,Activity,Tests,School
 from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers
 from rest_framework.views import APIView 
-from rest_framework.response import Response 
+from rest_framework.response import Response
 from rest_framework import status 
 from rest_framework.permissions import AllowAny 
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import ensure_csrf_cookie
 
+
 # Create your views here.
 
 @csrf_exempt
-def usuariosApi(request, id=0):
+def usuariosApi(request, email=None):
     if request.method=='GET':
         usuarios = Usuarios.objects.all()
         usuarios_ser = UsuariosSerializers(usuarios,many=True)
         return JsonResponse(usuarios_ser.data,safe=False)
     elif request.method=='POST':
-        usuariosdata =JSONParser().parse(request)
-        usuarios_ser=UsuariosSerializers(data=usuariosdata)
+        usuariodata =JSONParser().parse(request)
+        usuarios_ser=UsuariosSerializers(data=usuariodata)
         if usuarios_ser.is_valid():
             usuarios_ser.save()
-            return JsonResponse("Usuario anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) 
+            return JsonResponse({"message": "Usuario anadido exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
         return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='PUT':
-        usuariodata =JSONParser().parse(request)
-        usuario = Usuarios.objects.get(usuarioemail=usuariodata['email'])
+        usuariodata = request.data
+        usuario = Usuarios.objects.get(email=usuariodata['email'])
         usuarios_ser=UsuariosSerializers(usuario,data=usuariodata)
         if usuarios_ser.is_valid():
             usuarios_ser.save()
             return JsonResponse("Usuario actualizado exitosamente", safe=False, status=status.HTTP_200_OK) 
         return JsonResponse("No se actualizo", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='DELETE':
-        usuario=Usuarios.objects.get(email=id)
+        usuario=Usuarios.objects.get(email=email)
         usuario.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
     
-@ensure_csrf_cookie
+@csrf_exempt
 def adminsApi(request):
     if request.method=='GET':
         admins = Admins.objects.all()
@@ -141,7 +142,7 @@ def testsApi(request, id=0):
         test.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False)
 
-@ensure_csrf_cookie
+@csrf_exempt
 def schoolApi(request):
     if request.method=='GET':
         schools = School.objects.all()
@@ -166,4 +167,3 @@ def schoolApi(request):
         school=School.objects.get(email=id)
         school.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
-
