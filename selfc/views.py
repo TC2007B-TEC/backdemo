@@ -30,7 +30,9 @@ def usuariosApi(request, email=None):
         usuarios_ser=UsuariosSerializers(data=usuariodata)
         if usuarios_ser.is_valid():
             usuarios_ser.save()
+            print(usuarios_ser.context)
             return JsonResponse({"message": "Usuario anadido exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
+        print(usuarios_ser.errors)
         return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='PUT':
         usuariodata = request.data

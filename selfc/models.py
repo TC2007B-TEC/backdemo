@@ -11,7 +11,7 @@ class Usuarios(models.Model):
     name = models.CharField(max_length=50)
     lname = models.CharField(max_length=50)
     gender = models.CharField(max_length=20)
-    age = models.IntegerField()
+    age = models.CharField(max_length=20)
     country = models.CharField(max_length=50)
     discipline = models.CharField(max_length=50)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
