@@ -11,8 +11,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.views.decorators.csrf import ensure_csrf_cookie
-
-
+from rest_framework.parsers import MultiPartParser,FileUploadParser
+from rest_framework.decorators import api_view, parser_classes
+from django.utils.decorators import method_decorator
 # Create your views here.
 
 @csrf_exempt
@@ -92,20 +93,29 @@ def login(request):
             'error': 'Invalid credentials' # send an error message
         }
         return Response(res, status=status.HTTP_401_UNAUTHORIZED) # return an unauthorized response
-   
+
+
 @csrf_exempt
+@api_view(['GET', 'POST'])
 def activitiesApi(request, id=0):
     if request.method=='GET':
         activities = Activity.objects.all()
         activities_ser = ActivitySerializers(activities,many=True)
         return JsonResponse(activities_ser.data,safe=False)
     elif request.method=='POST':
-        activitiesdata =JSONParser().parse(request)
+        # Get the JSON data from request.data
+        activitiesdata = request.data['data']
+        # Get the file object from request.FILES
+        file_obj = request.FILES['file']
+        # Add the file object to the JSON data
+        activitiesdata['file_space'] = file_obj
+        # Use the serializer with the JSON data
         activities_ser=ActivitySerializers(data=activitiesdata)
         if activities_ser.is_valid():
             activities_ser.save()
-            return JsonResponse("activity anadido exitosamente", safe=False)
-        return JsonResponse("No se pudo agregar", safe=False)
+            return Response("activity anadido exitosamente")
+        print(activities_ser.errors)
+        return Response("No se pudo agregar")
     elif request.method=='PUT':
         activitydata =JSONParser().parse(request)
         activity = Activity.objects.get(activityemail=activitydata['email'])
@@ -182,3 +192,31 @@ def loginusu(request):
 
     # Return the filtered queryset
     return queryset
+
+@method_decorator(csrf_exempt, name='dispatch')
+def actividadApi(request):
+    if request.method == 'POST':
+        # Obtenemos el archivo y el JSON del request
+        file_space = request.FILES['file_space']
+        json_data = JSONParser().parse(request)
+
+        # Validamos el JSON
+        serializer = ActivitySerializers(data=json_data)
+        if serializer.is_valid():
+            # Creamos la actividad
+            activity = Activity(
+                name=serializer.validated_data['name'],
+                author=serializer.validated_data['author'],
+                file_space=file_space,
+                completed_space=serializer.validated_data['completed_space'],
+            )
+            activity.save()
+
+            # Devolvemos un mensaje de éxito
+            return JsonResponse({'message': 'Actividad creada exitosamente'}, status=status.HTTP_201_CREATED)
+        else:
+            # Devolvemos un mensaje de error
+            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # No se permite ningún otro método
+    return JsonResponse({'message': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
