@@ -2,19 +2,20 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-from selfc.models import Usuarios,Admins,Activity,Tests,School
-from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers
-from rest_framework.views import APIView 
+from selfc.models import Usuarios,Admins,Activity,Test,School,File,Pregunta,Respuesta, Resultado
+from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers, FileSerializers,PreguntaSerializers,RespuestaSerializers,ResultadoSerializers
 from rest_framework.response import Response
-from rest_framework import status,generics
-from rest_framework.permissions import AllowAny 
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import status
 from django.contrib.auth import authenticate
-from django.views.decorators.csrf import ensure_csrf_cookie
-from rest_framework.parsers import MultiPartParser,FileUploadParser
-from rest_framework.decorators import api_view, parser_classes
-from django.utils.decorators import method_decorator
+from django.contrib.auth.hashers import check_password
+from rest_framework.decorators import api_view
+from django.http import HttpResponse, FileResponse
+from rest_framework import response, schemas
+
+
 # Create your views here.
+
+
 
 @csrf_exempt
 def usuariosApi(request, email=None):
@@ -30,7 +31,6 @@ def usuariosApi(request, email=None):
         usuarios_ser=UsuariosSerializers(data=usuariodata)
         if usuarios_ser.is_valid():
             usuarios_ser.save()
-            print(usuarios_ser.context)
             return JsonResponse({"message": "Usuario anadido exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
         print(usuarios_ser.errors)
         return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
@@ -47,7 +47,7 @@ def usuariosApi(request, email=None):
         usuario.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
     
-@csrf_exempt
+@csrf_exempt  
 def adminsApi(request):
     if request.method=='GET':
         admins = Admins.objects.all()
@@ -73,89 +73,6 @@ def adminsApi(request):
         admin.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
 
-# Create a login view that uses the APIView and the JWT tokens
-
-@csrf_exempt
-def login(request):
-    userdata =JSONParser().parse(request)
-    email = userdata.data.get('email') # get the email from the request data
-    password = request.data.get('password') # get the password from the request data
-
-    user = authenticate(email=email, password=password) # authenticate the user
-
-    if user is not None: # if user is valid
-        refresh = RefreshToken.for_user(user) # create a refresh token for the user
-        res = { 
-            'refresh': str(refresh), # send the refresh token as a string
-            'access': str(refresh.access_token), # send the access token as a string
-        }
-        return Response(res, status=status.HTTP_200_OK) # return a success response with the tokens
-    else: # if user is invalid
-        res = {
-            'error': 'Invalid credentials' # send an error message
-        }
-        return Response(res, status=status.HTTP_401_UNAUTHORIZED) # return an unauthorized response
-
-
-@csrf_exempt
-@api_view(['GET', 'POST'])
-def activitiesApi(request, id=0):
-    if request.method=='GET':
-        activities = Activity.objects.all()
-        activities_ser = ActivitySerializers(activities,many=True)
-        return JsonResponse(activities_ser.data,safe=False)
-    elif request.method=='POST':
-        # Get the JSON data from request.data
-        activitiesdata = request.data['data']
-        # Get the file object from request.FILES
-        file_obj = request.FILES['file']
-        # Add the file object to the JSON data
-        activitiesdata['file_space'] = file_obj
-        # Use the serializer with the JSON data
-        activities_ser=ActivitySerializers(data=activitiesdata)
-        if activities_ser.is_valid():
-            activities_ser.save()
-            return Response("activity anadido exitosamente")
-        print(activities_ser.errors)
-        return Response("No se pudo agregar")
-    elif request.method=='PUT':
-        activitydata =JSONParser().parse(request)
-        activity = Activity.objects.get(activityemail=activitydata['email'])
-        activities_ser=ActivitySerializers(activity,data=activitydata)
-        if activities_ser.is_valid():
-            activities_ser.save()
-            return JsonResponse("activity actualizado exitosamente", safe=False)
-        return JsonResponse("No se actualizo")
-    elif request.method=='DELETE':
-        activity=Activity.objects.get(email=id)
-        activity.delete()
-        return JsonResponse("Eliminado de forma correcta",safe=False)
-
-@csrf_exempt
-def testsApi(request, id=0):
-    if request.method=='GET':
-        tests = Tests.objects.all()
-        tests_ser = TestSerializers(tests,many=True)
-        return JsonResponse(tests_ser.data,safe=False)
-    elif request.method=='POST':
-        testsdata =JSONParser().parse(request)
-        tests_ser=TestSerializers(data=testsdata)
-        if tests_ser.is_valid():
-            tests_ser.save()
-            return JsonResponse("test anadido exitosamente", safe=False)
-        return JsonResponse("No se pudo agregar", safe=False)
-    elif request.method=='PUT':
-        testdata =JSONParser().parse(request)
-        test = test.objects.get(testemail=testdata['email'])
-        tests_ser=TestSerializers(test,data=testdata)
-        if tests_ser.is_valid():
-            tests_ser.save()
-            return JsonResponse("test actualizado exitosamente", safe=False)
-        return JsonResponse("No se actualizo")
-    elif request.method=='DELETE':
-        test=test.objects.get(email=id)
-        test.delete()
-        return JsonResponse("Eliminado de forma correcta",safe=False)
 
 @csrf_exempt
 def schoolApi(request):
@@ -183,42 +100,105 @@ def schoolApi(request):
         school.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
 
-@csrf_exempt
 def loginusu(request):
     # Get the query params from the request
     email = request.query_params.get('email')
     password = request.query_params.get('password')
 
-    # Filter the Usuarios by email and password
-    queryset = Usuarios.objects.filter(email=email, password=password)
+    # Authenticate the user
+    user = authenticate(email=email, password=password)
 
-    # Return the filtered queryset
-    return queryset
+    # Verify the password
+    if user is not None and check_password(password, user.password):
+        return user
+    else:
+        return None
 
-@method_decorator(csrf_exempt, name='dispatch')
-def actividadApi(request):
-    if request.method == 'POST':
-        # Obtenemos el archivo y el JSON del request
-        file_space = request.FILES['file_space']
-        json_data = JSONParser().parse(request)
 
-        # Validamos el JSON
-        serializer = ActivitySerializers(data=json_data)
-        if serializer.is_valid():
-            # Creamos la actividad
-            activity = Activity(
-                name=serializer.validated_data['name'],
-                author=serializer.validated_data['author'],
-                file_space=file_space,
-                completed_space=serializer.validated_data['completed_space'],
-            )
-            activity.save()
+@csrf_exempt
+@api_view(['POST'])
+def postfile(request):
+    if request.method != 'POST':
+        # Devuelve un error 405 (Method Not Allowed)
+        return Response({'status': 'error', 'message': 'Only POST requests are allowed.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-            # Devolvemos un mensaje de éxito
-            return JsonResponse({'message': 'Actividad creada exitosamente'}, status=status.HTTP_201_CREATED)
+    file_serializer = FileSerializers(data=request.data)
+    if file_serializer.is_valid():
+        file_serializer.save()
+
+        activity_data = {
+            'name': request.data['name'],
+            'author': request.data['author'],
+            'file': file_serializer.instance.pk
+        }
+
+        activity_serializer = ActivitySerializers(data=activity_data)
+        if activity_serializer.is_valid():
+            activity_serializer.save()
+
+            return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
         else:
-            # Devolvemos un mensaje de error
-            return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Devuelve un error 400 (Bad Request) con los errores del serializador
+            return Response({'status': 'error', 'errors': activity_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        # Devuelve un error 400 (Bad Request) con los errores del serializador
+        return Response({'status': 'error', 'errors': file_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
-    # No se permite ningún otro método
-    return JsonResponse({'message': 'Método no permitido'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+
+@csrf_exempt
+@api_view(['GET'])
+def download_file(request):
+    activity_id = request.GET.get('activity_id')
+    activity = Activity.objects.get(id=activity_id)
+
+    file = activity.file
+
+    response = FileResponse(file.file)
+    response['Content-Disposition'] = f'attachment; filename={file.file.name}'
+
+    return response
+
+
+
+
+
+@api_view()
+def schema_view(request):
+    generator = schemas.SchemaGenerator(title='Bookings API')
+    return response.Response(generator.get_schema(request=request))
+
+
+@csrf_exempt
+@api_view(['POST'])
+def crear_test(request):
+    if request.method == 'POST':
+        test_data = JSONParser().parse(request)
+        test_serializer = TestSerializers(data=test_data)
+        if test_serializer.is_valid():
+            test_serializer.save()
+            return JsonResponse({"message": "Test creado exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
+        return JsonResponse("No se pudo crear el test", safe=False, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+@api_view(['POST'])
+def crear_pregunta(request):
+    if request.method == 'POST':
+        pregunta_data = JSONParser().parse(request)
+        pregunta_serializer = PreguntaSerializers(data=pregunta_data)
+        if pregunta_serializer.is_valid():
+            pregunta = pregunta_serializer.save()
+
+            # Obtenemos el test del usuario
+            test = Test.objects.filter(test_type=pregunta_data['test_type']).first()
+            if test is None:
+                return JsonResponse("No existe un test con el nombre especificado", safe=False, status=status.HTTP_400_BAD_REQUEST)
+
+            # Asociamos la pregunta al test
+            pregunta.test = test
+            pregunta.save()
+
+            return JsonResponse({"message": "Pregunta creada exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
+        return JsonResponse("No se pudo crear la pregunta", safe=False, status=status.HTTP_400_BAD_REQUEST)
+

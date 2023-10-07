@@ -1,7 +1,13 @@
 from rest_framework import serializers
-from selfc.models import Usuarios,Admins,Activity,Tests, School
+from selfc.models import Usuarios,Admins,Activity,School,File,Test,Pregunta, Respuesta, Resultado
+from django.contrib.auth.hashers import make_password
 
 class UsuariosSerializers(serializers.ModelSerializer):
+    def create(self, validated_data):
+        # Set the password hash
+        validated_data['password'] = make_password(validated_data['password'])
+        user = super().create(validated_data)
+        return user
     school= serializers.SlugRelatedField(queryset=School.objects.all(), slug_field="name")
     class Meta:
         model=Usuarios
@@ -12,27 +18,54 @@ class AdminsSerializers(serializers.ModelSerializer):
         model=Admins
         fields = '__all__'
 
+def validate_name(value):
+    if value not in ActivitySerializers.NAME_CHOICES:
+        raise serializers.ValidationError("Invalid choice.")
+    return value
+
+
 class ActivitySerializers(serializers.ModelSerializer):
-    NAME_CHOICES = (
-        ("A1", "Activity 1"),
-        ("A2", "Activity 2"),
-        ("A3", "Activity 3"),
-        ("A4", "Activity 4"),
-        ("FA", "Final Activity"),
-    )
-    name = serializers.ChoiceField(choices=NAME_CHOICES)
+    
     author = serializers.SlugRelatedField(queryset=Usuarios.objects.all(), slug_field="email")
     class Meta:
         model=Activity
         fields = '__all__'
 
 
-class TestSerializers(serializers.ModelSerializer):
-    class Meta:
-        model=Tests
-        fields = '__all__'
 
 class SchoolSerializers(serializers.ModelSerializer):
     class Meta:
         model=School
         fields = '__all__'
+
+class FileSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=File
+        fields= '__all__'
+
+class TestSerializers(serializers.ModelSerializer):
+    usuario = serializers.SlugRelatedField(queryset=Usuarios.objects.all(), slug_field="email")
+    class Meta:
+        model=Test
+        fields= '__all__'
+
+class PreguntaSerializers(serializers.ModelSerializer):
+    test_type = serializers.SlugRelatedField(queryset=Test.objects.all(), slug_field="test_type")
+    usuario = serializers.SlugRelatedField(queryset=Usuarios.objects.all(), slug_field="email")
+
+    class Meta:
+        model=Pregunta
+        fields= '__all__'
+
+class RespuestaSerializers(serializers.ModelSerializer):
+    pregunta = serializers.SlugRelatedField(queryset=Pregunta.objects.all(), slug_field="id")
+    class Meta:
+        model=Respuesta
+        fields= '__all__'
+
+class ResultadoSerializers(serializers.ModelSerializer):
+    test = serializers.SlugRelatedField(queryset=Test.objects.all(), slug_field="test_type")
+    usuario = serializers.SlugRelatedField(queryset=Usuarios.objects.all(), slug_field="email")
+    class Meta:
+        model=Resultado
+        fields= '__all__'

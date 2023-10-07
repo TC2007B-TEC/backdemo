@@ -7,7 +7,7 @@ class School(models.Model):
 
 class Usuarios(models.Model):
     email = models.EmailField(max_length=500,primary_key=True)
-    password = models.CharField(max_length=50)
+    password = models.CharField(max_length=255)
     name = models.CharField(max_length=50)
     lname = models.CharField(max_length=50)
     gender = models.CharField(max_length=20)
@@ -16,11 +16,14 @@ class Usuarios(models.Model):
     discipline = models.CharField(max_length=50)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
 
+class File(models.Model):
+    file=models.FileField(upload_to='files/', null=True, blank=True,default=None)
+
 class Activity(models.Model):
     name = models.CharField(max_length=100)
     author = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='activities')
-    file_space = models.FileField(upload_to='files/')
-    completed_space = models.BooleanField(default=False)
+    file = models.OneToOneField(File, on_delete=models.CASCADE, related_name='activity',default=None)
+
 
 
 class Admins(models.Model):
@@ -30,12 +33,30 @@ class Admins(models.Model):
     lname = models.CharField(max_length=50)
     role = models.CharField(max_length=50,default="admin")
 
-class Tests(models.Model):
-    name=models.CharField(max_length=50)
-    author = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='tests')
-    autocontrol=models.IntegerField()
-    liderazgo=models.IntegerField()
-    conciencia=models.IntegerField()
-    innovacion=models.IntegerField()
-    sistemico=models.IntegerField()
-    cientifico=models.IntegerField()
+class Test(models.Model):
+    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    test_type = models.CharField(max_length=50)
+
+class Pregunta(models.Model):
+    # ...
+    # Definimos la relación con el modelo Test
+    namepregunta=models.CharField(max_length=500)
+    idpregunta = models.IntegerField()
+    usuario= models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+    test_type = models.ForeignKey(Test, on_delete=models.CASCADE)
+
+class Respuesta(models.Model):
+    # ...
+    respuesta = models.IntegerField()
+    # Definimos la relación con el modelo Pregunta
+    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+
+class Resultado(models.Model):
+    # Definimos la relación con el modelo Test
+    test_type = models.ForeignKey(Test, on_delete=models.CASCADE)
+
+    # Definimos la relación con el modelo Usuario
+    usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
+
+    # Definimos el campo de resultados
+    resultados = models.IntegerField(default=0)

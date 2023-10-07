@@ -25,10 +25,10 @@ SECRET_KEY = 'django-insecure-yfbbvvxdwb3a345ca9wan#z*mq&dod4d+%4ba@)ls)p3_)@fxe
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*'
+ALLOWED_HOSTS = [
 ]
 CSRF_TRUSTED_ORIGINS = [
-  'http://localhost:3001',
+  'http://localhost:3001'
   ]
 
 # Application definition
@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'selfc.apps.SelfcConfig'
+    'selfc.apps.SelfcConfig',
+    'rest_framework_swagger',
+    'drf_yasg'
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -88,12 +90,12 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sel4c_back',
-        'USER': 'sel4c',
-        'PASSWORD': 'Tectc2007b%%',
-        'HOST':'backselfc.mysql.database.azure.com',
-        'PORT':'3306',
-        'OPTIONS': { 'ssl': { 'ca': './DigiCertGlobalRootCA.crt.pem' } } 
+        'NAME': 'demobackselfc',
+        'USER': 'root',
+        'PASSWORD': 'Ososil89?',
+        'HOST':'127.0.0.1',
+        'PORT':'3306'
+
     }
 }
 
