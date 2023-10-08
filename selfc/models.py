@@ -57,7 +57,6 @@ class Test(models.Model):
 class Pregunta(models.Model):
     # ...
     # Definimos la relación con el modelo Test
-    namepregunta=models.CharField(max_length=500)
     idpregunta = models.IntegerField()
     usuario= models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     test_type = models.ForeignKey(Test, on_delete=models.CASCADE)
