@@ -16,6 +16,10 @@ class Usuarios(models.Model):
     discipline = models.CharField(max_length=50)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
 
+    def check_password(self, password):
+        """Verifica la contraseña de un usuario."""
+        return password == self.password
+
 class File(models.Model):
     file=models.FileField(upload_to='files/', null=True, blank=True,default=None)
 

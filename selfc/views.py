@@ -11,6 +11,8 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.decorators import api_view
 from django.http import HttpResponse, FileResponse
 from rest_framework import response, schemas
+import bcrypt;
+import jwt;
 
 
 # Create your views here.
@@ -100,19 +102,30 @@ def schoolApi(request):
         school.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
 
+@api_view(['POST'])
 def loginusu(request):
-    # Get the query params from the request
-    email = request.query_params.get('email')
-    password = request.query_params.get('password')
+    email = request.data['email']
+    password = request.data['password']
 
-    # Authenticate the user
-    user = authenticate(email=email, password=password)
+    user = Usuarios.objects.filter(email=email).first()
+    if user is None:
+        return Response(status=status.HTTP_404_NOT_FOUND)
 
-    # Verify the password
-    if user is not None and check_password(password, user.password):
-        return user
-    else:
-        return None
+    if not user.check_password(password):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    data = {
+        'email': user.email,
+        'name': user.name,
+        'lname': user.lname,
+        'gender': user.gender,
+        'age': user.age,
+        'country': user.country,
+        'discipline': user.discipline,
+        'school': user.school.name,
+    }
+    return Response(data=data, status=status.HTTP_200_OK)
+
 
 
 @csrf_exempt

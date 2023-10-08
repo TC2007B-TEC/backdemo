@@ -3,11 +3,6 @@ from selfc.models import Usuarios,Admins,Activity,School,File,Test,Pregunta, Res
 from django.contrib.auth.hashers import make_password
 
 class UsuariosSerializers(serializers.ModelSerializer):
-    def create(self, validated_data):
-        # Set the password hash
-        validated_data['password'] = make_password(validated_data['password'])
-        user = super().create(validated_data)
-        return user
     school= serializers.SlugRelatedField(queryset=School.objects.all(), slug_field="name")
     class Meta:
         model=Usuarios
