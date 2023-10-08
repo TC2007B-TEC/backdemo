@@ -28,7 +28,10 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'http://localhost:3001',
     'http://localhost:3000',
-    'http://20.127.122.6:8000'
+    'http://20.127.122.6:8000',
+    'http://20.127.122.6',
+    '20.127.122.6'
+
 ]
 CSRF_TRUSTED_ORIGINS = [
   'http://localhost:3001',
