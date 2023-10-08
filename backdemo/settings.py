@@ -28,7 +28,9 @@ DEBUG = True
 ALLOWED_HOSTS = [
 ]
 CSRF_TRUSTED_ORIGINS = [
-  'http://localhost:3001'
+  'http://localhost:3001',
+  'http://localhost:3000',
+  'http://20.127.122.6:8000'
   ]
 
 # Application definition
