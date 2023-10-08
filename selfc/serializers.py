@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from selfc.models import Usuarios,Admins,Activity,School,File,Test,Pregunta, Respuesta, Resultado
+from selfc.models import Usuarios,Admins,Activity,School,File,Test,Pregunta, Resultado, Profesor
 from django.contrib.auth.hashers import make_password
 
 class UsuariosSerializers(serializers.ModelSerializer):
@@ -11,6 +11,11 @@ class UsuariosSerializers(serializers.ModelSerializer):
 class AdminsSerializers(serializers.ModelSerializer):
     class Meta:
         model=Admins
+        fields = '__all__'
+
+class ProfesoresSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=Profesor
         fields = '__all__'
 
 def validate_name(value):
@@ -52,11 +57,6 @@ class PreguntaSerializers(serializers.ModelSerializer):
         model=Pregunta
         fields= '__all__'
 
-class RespuestaSerializers(serializers.ModelSerializer):
-    pregunta = serializers.SlugRelatedField(queryset=Pregunta.objects.all(), slug_field="id")
-    class Meta:
-        model=Respuesta
-        fields= '__all__'
 
 class ResultadoSerializers(serializers.ModelSerializer):
     test = serializers.SlugRelatedField(queryset=Test.objects.all(), slug_field="test_type")

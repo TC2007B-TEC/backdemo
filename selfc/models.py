@@ -28,7 +28,16 @@ class Activity(models.Model):
     author = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='activities')
     file = models.OneToOneField(File, on_delete=models.CASCADE, related_name='activity',default=None)
 
+class Profesor(models.Model):
+    email = models.EmailField(max_length=200,primary_key=True)
+    password = models.CharField(max_length=50)
+    name = models.CharField(max_length=50)
+    lname = models.CharField(max_length=50)
+    role = models.CharField(max_length=50,default="admin")
 
+    def check_password(self, password):
+        """Verifica la contraseña de un admin."""
+        return password == self.password
 
 class Admins(models.Model):
     email = models.EmailField(max_length=200,primary_key=True)
@@ -36,6 +45,10 @@ class Admins(models.Model):
     name = models.CharField(max_length=50)
     lname = models.CharField(max_length=50)
     role = models.CharField(max_length=50,default="admin")
+
+    def check_password(self, password):
+        """Verifica la contraseña de un admin."""
+        return password == self.password
 
 class Test(models.Model):
     usuario = models.ForeignKey(Usuarios, on_delete=models.CASCADE)
@@ -48,12 +61,7 @@ class Pregunta(models.Model):
     idpregunta = models.IntegerField()
     usuario= models.ForeignKey(Usuarios, on_delete=models.CASCADE)
     test_type = models.ForeignKey(Test, on_delete=models.CASCADE)
-
-class Respuesta(models.Model):
-    # ...
-    respuesta = models.IntegerField()
-    # Definimos la relación con el modelo Pregunta
-    pregunta = models.ForeignKey(Pregunta, on_delete=models.CASCADE)
+    resp = models.IntegerField()
 
 class Resultado(models.Model):
     # Definimos la relación con el modelo Test

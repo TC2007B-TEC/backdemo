@@ -2,8 +2,8 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from django.http.response import JsonResponse
-from selfc.models import Usuarios,Admins,Activity,Test,School,File,Pregunta,Respuesta, Resultado
-from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers, FileSerializers,PreguntaSerializers,RespuestaSerializers,ResultadoSerializers
+from selfc.models import Usuarios,Admins,Activity,Test,School,File,Pregunta, Resultado, Profesor
+from selfc.serializers import UsuariosSerializers,AdminsSerializers,ActivitySerializers, TestSerializers, SchoolSerializers, FileSerializers,PreguntaSerializers,ResultadoSerializers,ProfesoresSerializers
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import authenticate
@@ -11,8 +11,7 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.decorators import api_view
 from django.http import HttpResponse, FileResponse
 from rest_framework import response, schemas
-import bcrypt;
-import jwt;
+
 
 
 # Create your views here.
@@ -48,19 +47,42 @@ def usuariosApi(request, email=None):
         usuario=Usuarios.objects.get(email=email)
         usuario.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
-    
-@csrf_exempt  
-def adminsApi(request):
+
+@csrf_exempt
+def profesApi(request, email=None):
     if request.method=='GET':
-        admins = Admins.objects.all()
-        admins_ser = AdminsSerializers(admins,many=True)
+        queryset = Profesor.objects.all()
+        email = request.GET.get('email')
+        if email is not None:
+            queryset = queryset.filter(email=email)
+        profesores_ser = ProfesoresSerializers(queryset,many=True)
+        return JsonResponse(profesores_ser.data,safe=False)
+    elif request.method=='POST':
+        profesordata =JSONParser().parse(request)
+        profesores_ser=ProfesoresSerializers(data=profesordata)
+        if profesores_ser.is_valid():
+            profesores_ser.save()
+            return JsonResponse({"message": "Admin anadido exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
+        print(profesores_ser.errors)
+        return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+@api_view(['POST'])
+def adminsApi(request, email=None):
+    if request.method=='GET':
+        queryset = Admins.objects.all()
+        email = request.GET.get('email')
+        if email is not None:
+            queryset = queryset.filter(email=email)
+        admins_ser = AdminsSerializers(queryset,many=True)
         return JsonResponse(admins_ser.data,safe=False)
     elif request.method=='POST':
-        adminsdata =JSONParser().parse(request)
-        admins_ser=AdminsSerializers(data=adminsdata)
+        admindata =JSONParser().parse(request)
+        admins_ser=AdminsSerializers(data=admindata)
         if admins_ser.is_valid():
             admins_ser.save()
-            return JsonResponse("admin anadido exitosamente", safe=False, status=status.HTTP_201_CREATED) 
+            return JsonResponse({"message": "Admin anadido exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
+        print(admins_ser.errors)
         return JsonResponse("No se pudo agregar", safe=False, status=status.HTTP_400_BAD_REQUEST) 
     elif request.method=='PUT':
         admindata =JSONParser().parse(request)
@@ -126,6 +148,25 @@ def loginusu(request):
     }
     return Response(data=data, status=status.HTTP_200_OK)
 
+@api_view(['POST'])
+def loginadmin(request):
+    email = request.data['email']
+    password = request.data['password']
+
+    user = Admins.objects.filter(email=email).first()
+    if user is None:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if not user.check_password(password):
+        return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+    data = {
+        'email': user.email,
+        'name': user.name,
+        'lname': user.lname,
+        'role': user.role,
+    }
+    return Response(data=data,status=status.HTTP_200_OK)
 
 
 @csrf_exempt

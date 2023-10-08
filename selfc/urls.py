@@ -24,9 +24,11 @@ urlpatterns=[
     path("admin/",views.adminsApi),
     path("school/",views.schoolApi),
     path("usuariolog/",views.loginusu),
+    path("adminlog/",views.loginadmin),
     path("fileup/",views.postfile),
     path("filedown/",views.download_file),
     path("newtest/",views.crear_test),
     path("newpregunta/",views.crear_pregunta),
+    path("profe/",views.profesApi),
 
 ]
