@@ -90,12 +90,17 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'demobackselfc',
-        'USER': 'root',
-        'PASSWORD': 'Ososil89?',
-        'HOST':'127.0.0.1',
-        'PORT':'3306'
+        #'NAME': 'demobackselfc',
+        #'USER': 'root',
+        #'PASSWORD': 'Ososil89?',
+        #'HOST':'127.0.0.1',
+        #'PORT':'3306'
 
+        'NAME': 'demobackselfc',
+        'USER': 'sel4c',
+        'PASSWORD': 'Tectc2007b%%',
+        'HOST':'backselfc.mysql.database.azure.com',
+        'PORT':'3306'
     }
 }
 
