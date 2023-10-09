@@ -72,3 +72,5 @@ class Resultado(models.Model):
 
     # Definimos el campo de resultados
     resultados = models.IntegerField(default=0)
+
+

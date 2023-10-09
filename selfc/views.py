@@ -70,15 +70,15 @@ def profesApi(request, email=None):
 @api_view(['POST'])
 def adminsApi(request, email=None):
     if request.method=='GET':
-        queryset = Admins.objects.all()
+        queryset = Profesor.objects.all()
         email = request.GET.get('email')
         if email is not None:
             queryset = queryset.filter(email=email)
-        admins_ser = AdminsSerializers(queryset,many=True)
+        admins_ser = ProfesoresSerializers(queryset,many=True)
         return JsonResponse(admins_ser.data,safe=False)
     elif request.method=='POST':
         admindata =JSONParser().parse(request)
-        admins_ser=AdminsSerializers(data=admindata)
+        admins_ser=ProfesoresSerializers(data=admindata)
         if admins_ser.is_valid():
             admins_ser.save()
             return JsonResponse({"message": "Admin anadido exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
@@ -97,6 +97,38 @@ def adminsApi(request, email=None):
         admin.delete()
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
 
+@csrf_exempt
+@api_view(['GET'])
+def ActivityApi(request):
+    if request.method == 'GET':
+
+        if 'email' not in request.data:
+            return JsonResponse({'error': 'El JSON debe contener el campo email'}, status=400)
+
+        author = request.data['email']
+
+        activities = Activity.objects.filter(author=author)
+
+        activities_ser = ActivitySerializers(activities, many=True)
+        print(activities_ser.errors)
+        return JsonResponse(activities_ser.data, safe=False)
+
+@csrf_exempt
+@api_view(['GET'])
+def unUsuario(request):
+    if request.method == 'GET':
+
+        if 'email' not in request.data:
+            return JsonResponse({'error': 'El JSON debe contener el campo email'}, status=400)
+
+        email = request.data['email']
+
+        usuario = Usuarios.objects.filter(email=email)
+
+        usuario_ser = UsuariosSerializers(usuario, many=True)
+        print(usuario_ser.errors)
+    
+        return JsonResponse(usuario_ser.data, safe=False)
 
 @csrf_exempt
 def schoolApi(request):
@@ -148,13 +180,15 @@ def loginusu(request):
     }
     return Response(data=data, status=status.HTTP_200_OK)
 
+@csrf_exempt
 @api_view(['POST'])
 def loginadmin(request):
     email = request.data['email']
     password = request.data['password']
 
-    user = Admins.objects.filter(email=email).first()
+    user = Profesor.objects.filter(email=email).first()
     if user is None:
+        print(user.errors)
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if not user.check_password(password):
@@ -263,3 +297,64 @@ def crear_pregunta(request):
 
     return JsonResponse({"message": "Pregunta creada exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
 
+
+@csrf_exempt
+def postfileba(request):
+    """Guarda un archivo y una actividad en la base de datos."""
+
+    # Valida los datos de la solicitud.
+    file_serializer = FileSerializers(data=request.data)
+    if file_serializer.is_valid():
+        file_serializer.save()
+
+        activity_data = {
+            'name': request.data['name'],
+            'author': request.data['author'],
+            'file': file_serializer.instance.pk
+        }
+
+        activity_serializer = ActivitySerializers(data=activity_data)
+        if activity_serializer.is_valid():
+            activity_serializer.save()
+
+            # Devuelve una respuesta exitosa.
+            return JsonResponse({'status': 'success'}, status=status.HTTP_201_CREATED)
+        else:
+            # Devuelve un error 400 (Bad Request) con los errores del serializador.
+            return Response({'status': 'error', 'errors': activity_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        # Devuelve un error 400 (Bad Request) con los errores del serializador.
+        return Response({'status': 'error', 'errors': file_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@csrf_exempt
+@api_view(['POST'])
+def postfilebi(request):
+    # Obtener el archivo y los datos del request
+    file = request.FILES['file']
+    name = request.POST['name']
+    author = request.POST['author']
+
+    # Crear y guardar el objeto File
+    file_obj = File(file=file)
+    file_obj.save()
+
+    # Crear y guardar el objeto Activity
+    activity_obj = Activity(name=name, author=author, file=file_obj)
+    activity_obj.save()
+
+    return render(request, 'core/postfile.html', {
+         'file': file_obj,
+         'activity': activity_obj})
+
+
+@api_view(['POST'])
+def verifact(request):
+    data = JSONParser().parse(request)
+    act = Activity.objects.filter(name=data['name'], author=data['email']).first()
+    if act is None:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    data = {
+        'name': act.name,
+        'author': act.author.email,
+    }
+    return Response(data=data, status=status.HTTP_200_OK)

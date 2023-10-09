@@ -21,7 +21,6 @@ urlpatterns=[
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path("usuario/",views.usuariosApi),
-    path("admin/",views.adminsApi),
     path("school/",views.schoolApi),
     path("usuariolog/",views.loginusu),
     path("adminlog/",views.loginadmin),
@@ -30,5 +29,8 @@ urlpatterns=[
     path("newtest/",views.crear_test),
     path("newpregunta/",views.crear_pregunta),
     path("profe/",views.profesApi),
+    path("activity/",views.ActivityApi),
+    path("unusuario/",views.unUsuario),
+    path("verifact/",views.verifact),
 
 ]

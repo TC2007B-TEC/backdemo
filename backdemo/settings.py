@@ -31,7 +31,8 @@ ALLOWED_HOSTS = [
     'http://20.127.122.6:8000',
     'http://20.127.122.6',
     '20.127.122.6',
-    '127.0.0.1'
+    '127.0.0.1',
+    'localhost'
 
 ]
 CSRF_TRUSTED_ORIGINS = [
@@ -98,12 +99,12 @@ pymysql.install_as_MySQLdb()
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.mysql',
-        # 'NAME': 'demobackselfc',
-        # 'USER': 'root',
-        # 'PASSWORD': 'Ososil89?',
-        # 'HOST':'127.0.0.1',
-        # 'PORT':'3306'
+        'ENGINE': 'django.db.backends.mysql',
+         #'NAME': 'demobackselfc',
+         #'USER': 'root',
+         #'PASSWORD': 'Ososil89?',
+         #'HOST':'127.0.0.1',
+         #'PORT':'3306'
 
         'NAME': 'back-sel4c',
         'USER': 'sel4c',
