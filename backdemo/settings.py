@@ -30,7 +30,8 @@ ALLOWED_HOSTS = [
     'http://localhost:3000',
     'http://20.127.122.6:8000',
     'http://20.127.122.6',
-    '20.127.122.6'
+    '20.127.122.6',
+    '127.0.0.1'
 
 ]
 CSRF_TRUSTED_ORIGINS = [
@@ -98,22 +99,22 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        #'NAME': 'demobackselfc',
-        #'USER': 'root',
-        #'PASSWORD': 'Ososil89?',
-        #'HOST':'127.0.0.1',
-        #'PORT':'3306'
-
         'NAME': 'demobackselfc',
-        'USER': 'sel4c',
-        'PASSWORD': 'Tectc2007b%%',
-        'HOST':'backselfc.mysql.database.azure.com',
-        'PORT':'3306',
-        'OPTIONS': {
-            'ssl': {
-                'ca': 'DigiCertGlobalRootCA.crt.pem',
-            }
-        }
+        'USER': 'root',
+        'PASSWORD': 'Ososil89?',
+        'HOST':'127.0.0.1',
+        'PORT':'3306'
+
+        # 'NAME': 'demobackselfc',
+        # 'USER': 'sel4c',
+        # 'PASSWORD': 'Tectc2007b%%',
+        # 'HOST':'backselfc.mysql.database.azure.com',
+        # 'PORT':'3306',
+        # 'OPTIONS': {
+        #     'ssl': {
+        #         'ca': 'DigiCertGlobalRootCA.crt.pem',
+        #     }
+        # }
     }
 }
 

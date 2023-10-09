@@ -238,21 +238,28 @@ def crear_test(request):
 @csrf_exempt
 @api_view(['POST'])
 def crear_pregunta(request):
-    if request.method == 'POST':
-        pregunta_data = JSONParser().parse(request)
-        pregunta_serializer = PreguntaSerializers(data=pregunta_data)
-        if pregunta_serializer.is_valid():
-            pregunta = pregunta_serializer.save()
+    data = JSONParser().parse(request)
 
-            # Obtenemos el test del usuario
-            test = Test.objects.filter(test_type=pregunta_data['test_type']).first()
-            if test is None:
-                return JsonResponse("No existe un test con el nombre especificado", safe=False, status=status.HTTP_400_BAD_REQUEST)
+    # Obtenemos el test del usuario con el test_type especificado
+    test = Test.objects.filter(test_type=data['test_type'], usuario=data['usuario']).first()
+    if test is None:
+        return JsonResponse(
+            "No existe un test con el nombre especificado para el usuario",
+            safe=False,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
-            # Asociamos la pregunta al test
-            pregunta.test = test
-            pregunta.save()
+    # Creamos la pregunta
+    pregunta = Pregunta(
+        idpregunta=data['idpregunta'],
+        usuario=data['usuario'],
+        Test=test,
+        resp=data['resp'],
+        test_type=data['test_type'],
+    )
 
-            return JsonResponse({"message": "Pregunta creada exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
-        return JsonResponse("No se pudo crear la pregunta", safe=False, status=status.HTTP_400_BAD_REQUEST)
+    # Guardamos la pregunta en la base de datos
+    pregunta.save()
+
+    return JsonResponse({"message": "Pregunta creada exitosamente"}, safe=False, status=status.HTTP_201_CREATED)
 
