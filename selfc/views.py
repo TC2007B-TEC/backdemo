@@ -372,13 +372,13 @@ def getTest(request):
     preguntas = Pregunta.objects.filter(Test__test_type=test_type, Test__usuario=usuario).values()
 
     # Convertimos la lista de diccionarios a un string json
-    preguntas_json = json.dumps(list(preguntas), indent=None, sort_keys=False)
+    preguntas_ser = PreguntaSerializers(preguntas, many=True)
 
     # Devolvemos el string json como respuesta
     if not preguntas:
         return Response({'message': 'No se encontraron preguntas'})
     else:
-        return Response(preguntas_json)
+        return JsonResponse(preguntas_ser.data, safe=False)
 
 @csrf_exempt
 @api_view(['GET'])
