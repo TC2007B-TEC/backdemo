@@ -33,6 +33,8 @@ urlpatterns=[
     path("unusuario/",views.unUsuario),
     path("verifact/",views.verifact),
     path("getpreguntas/",views.getTest),
-    path("filedownapp/",views.download_fileapp)
+    path("filedownapp/",views.download_fileapp),
+    path("getname/",views.getName)
+
 
 ]

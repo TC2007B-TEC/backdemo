@@ -394,3 +394,19 @@ def download_fileapp(request):
     response['Content-Type'] = mimetypes.guess_type(file.file.name)[0] # Usamos la función guess_type para obtener el tipo MIME del archivo
 
     return response
+
+@csrf_exempt
+@api_view(['GET'])
+def getName(request):
+    email = request.GET.get('email')
+    usuario = Usuarios.objects.filter(email=email).first()
+
+    data = {
+        'name': usuario.name,
+        'lname': usuario.lname,
+    }
+
+    if not usuario:
+        return Response({'message': 'No se encontro al usuario'})
+    else:
+        return Response(data=data, status=status.HTTP_200_OK)
