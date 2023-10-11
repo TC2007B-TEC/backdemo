@@ -11,6 +11,8 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.decorators import api_view
 from django.http import HttpResponse, FileResponse
 from rest_framework import response, schemas
+import mimetypes 
+import json
 
 
 
@@ -98,9 +100,9 @@ def adminsApi(request, email=None):
         return JsonResponse("Eliminado de forma correcta",safe=False, status=status.HTTP_204_NO_CONTENT) 
 
 @csrf_exempt
-@api_view(['GET'])
+@api_view(['POST'])
 def ActivityApi(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
 
         if 'email' not in request.data:
             return JsonResponse({'error': 'El JSON debe contener el campo email'}, status=400)
@@ -110,13 +112,13 @@ def ActivityApi(request):
         activities = Activity.objects.filter(author=author)
 
         activities_ser = ActivitySerializers(activities, many=True)
-        print(activities_ser.errors)
+
         return JsonResponse(activities_ser.data, safe=False)
 
 @csrf_exempt
-@api_view(['GET'])
+@api_view(['POST'])
 def unUsuario(request):
-    if request.method == 'GET':
+    if request.method == 'POST':
 
         if 'email' not in request.data:
             return JsonResponse({'error': 'El JSON debe contener el campo email'}, status=400)
@@ -126,7 +128,6 @@ def unUsuario(request):
         usuario = Usuarios.objects.filter(email=email)
 
         usuario_ser = UsuariosSerializers(usuario, many=True)
-        print(usuario_ser.errors)
     
         return JsonResponse(usuario_ser.data, safe=False)
 
@@ -245,6 +246,7 @@ def download_file(request):
 
     response = FileResponse(file.file)
     response['Content-Disposition'] = f'attachment; filename={file.file.name}'
+    response['Content-Type'] = mimetypes.guess_type(file.file.name)[0] # Usamos la función guess_type para obtener el tipo MIME del archivo
 
     return response
 
@@ -358,3 +360,37 @@ def verifact(request):
         'author': act.author.email,
     }
     return Response(data=data, status=status.HTTP_200_OK)
+
+
+@csrf_exempt
+@api_view(['GET'])
+def getTest(request):
+    test_type = request.GET.get('test_type')
+    usuario = request.GET.get('usuario')
+
+    # Obtenemos las preguntas con el test_type especificado
+    preguntas = Pregunta.objects.filter(Test__test_type=test_type, Test__usuario=usuario).values()
+
+    # Convertimos la lista de diccionarios a un string json
+    preguntas_json = json.dumps(list(preguntas), indent=None, sort_keys=False)
+
+    # Devolvemos el string json como respuesta
+    if not preguntas:
+        return Response({'message': 'No se encontraron preguntas'})
+    else:
+        return Response(preguntas_json)
+
+@csrf_exempt
+@api_view(['GET'])
+def download_fileapp(request):
+    name = request.GET.get('name')
+    author = request.GET.get('author')
+    activity = Activity.objects.filter(name=name,author=author).first()
+
+    file = activity.file
+
+    response = FileResponse(file.file)
+    response['Content-Disposition'] = f'attachment; filename={file.file.name}'
+    response['Content-Type'] = mimetypes.guess_type(file.file.name)[0] # Usamos la función guess_type para obtener el tipo MIME del archivo
+
+    return response

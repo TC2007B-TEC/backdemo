@@ -50,13 +50,11 @@ class TestSerializers(serializers.ModelSerializer):
         fields= '__all__'
 
 class PreguntaSerializers(serializers.ModelSerializer):
-    test_type = serializers.SlugRelatedField(queryset=Test.objects.all(), slug_field="test_type")
     usuario = serializers.SlugRelatedField(queryset=Usuarios.objects.all(), slug_field="email")
-
+    
     class Meta:
         model=Pregunta
         fields= '__all__'
-
 
 class ResultadoSerializers(serializers.ModelSerializer):
     test = serializers.SlugRelatedField(queryset=Test.objects.all(), slug_field="test_type")
