@@ -410,3 +410,10 @@ def getName(request):
         return Response({'message': 'No se encontro al usuario'})
     else:
         return Response(data=data, status=status.HTTP_200_OK)
+    
+@csrf_exempt
+def getActividades(request):
+    if request.method=='GET':
+        queryset = Activity.objects.all()
+        actividades_ser = ActivitySerializers(queryset,many=True)
+        return JsonResponse(actividades_ser.data,safe=False)

@@ -54,7 +54,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'selfc.apps.SelfcConfig',
     'rest_framework_swagger',
-    'drf_yasg'
+    'drf_yasg',
+    'rest_framework_simplejwt.token_blacklist'
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -100,22 +101,22 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
          'ENGINE': 'django.db.backends.mysql',
-         #'NAME': 'demobackselfc',
-         #'USER': 'root',
-         #'PASSWORD': 'Ososil89?',
-         #'HOST':'127.0.0.1',
-         #'PORT':'3306'
+         'NAME': 'demobackselfc',
+         'USER': 'root',
+         'PASSWORD': 'Ososil89?',
+         'HOST':'127.0.0.1',
+         'PORT':'3306'
 
-        'NAME': 'back-sel4c',
-        'USER': 'sel4c',
-        'PASSWORD': 'Tectc2007b%%',
-        'HOST':'backselfc.mysql.database.azure.com',
-        'PORT':'3306',
-        'OPTIONS': {
-             'ssl': {
-                 'ca': 'DigiCertGlobalRootCA.crt.pem',
-             }
-         }
+        #'NAME': 'back-sel4c',
+        #'USER': 'sel4c',
+        #'PASSWORD': 'Tectc2007b%%',
+        #'HOST':'backselfc.mysql.database.azure.com',
+        #'PORT':'3306',
+        #'OPTIONS': {
+        #     'ssl': {
+        #         'ca': 'DigiCertGlobalRootCA.crt.pem',
+        #     }
+        # }
     }
 }
 

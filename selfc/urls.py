@@ -34,7 +34,8 @@ urlpatterns=[
     path("verifact/",views.verifact),
     path("getpreguntas/",views.getTest),
     path("filedownapp/",views.download_fileapp),
-    path("getname/",views.getName)
+    path("getname/",views.getName),
+    path("getact/",views.getActividades)
 
 
 ]
