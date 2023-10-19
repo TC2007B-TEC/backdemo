@@ -30,7 +30,7 @@ class Activity(models.Model):
 
 class Profesor(models.Model):
     email = models.EmailField(max_length=200,primary_key=True)
-    password = models.CharField(max_length=50)
+    password = models.CharField(max_length=250)
     name = models.CharField(max_length=50)
     lname = models.CharField(max_length=50)
     role = models.CharField(max_length=50,default="admin")
